@@ -1,0 +1,105 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        
+        
+        <title>Prologue by HTML5 UP</title>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+        <meta name="description" content="" />
+        <meta name="keywords" content="" />
+        <script src="js/jquery.min.js"></script>
+        <script src="js/jquery.scrolly.min.js"></script>
+        <script src="js/jquery.scrollzer.min.js"></script>
+        <script src="js/skel.min.js"></script>
+        <script src="js/skel-layers.min.js"></script>
+        <script src="js/init.js"></script>
+        <script src="js/connection.js"></script>
+        <noscript>
+            <link rel="stylesheet" href="css/skel.css" />
+            <link rel="stylesheet" href="css/style.css" />
+            <link rel="stylesheet" href="css/style-wide.css" />
+        </noscript>
+        <link rel="stylesheet" href="css/ajouterplayer.css" />
+        
+        
+    </head>
+    
+    
+    <body onload="initialize()">
+        
+        <!-- Header -->
+        <div id="header" class="skel-layers-fixed">
+            
+            <div class="top">
+                
+                <!-- Logo -->
+                <div id="logo">
+                    <h1 id="title">Jeu Ubiquitaire</h1></br>
+                    <span class="image avatar48"><img src="images/avatar.jpg" alt="" /></span>
+                </div>
+                
+                <!-- Nav -->
+                <nav id="nav">
+                    
+                    <ul>
+                        <li><a href="index.html" id="top-link" class="skel-layers-ignoreHref"><span class="icon fa-home">Map</span></a></li>
+                        <li><a href="#portfolio" id="portfolio-link" class="skel-layers-ignoreHref"><span class="icon fa-th">Ajout Joueur</span></a></li>
+                        <li><a href="listeEquipe.html" id="about-link" class="skel-layers-ignoreHref"><span class="icon fa-user">Liste Equipe</span></a></li>
+                        
+                    </ul>
+                </nav>
+                
+            </div>
+            
+        </div>
+        
+        <!-- Main -->
+        <div id="main">
+            
+            
+            <!-- Intro -->
+            <section id="top" class="one dark cover">
+                <div class="container">
+                    
+                    
+                    <div id="map_canvas"></div>
+                    
+                    
+                    
+                </div>
+            </section>
+            
+            <!-- Portfolio -->
+            <section id="portfolio" class="two">
+                <div class="container">
+                    <div id="SousForm">
+                        <header> <h2>Ajouter joueur</h2> </header>
+                        <div id="form"> <div class="section">
+                            
+                            <div class="question-label"> Nom : <input type="text" name="name" id="name"/> </div>
+                            <br>
+                            <div class="question-type">Choix  Equipe :
+                                <select  name="team" id="team">
+                                    <option value="equipe1">Equipe 1</option>
+                                    <option value="equipe2">Equipe 2</option>
+                                </select>
+                                
+                            </div>
+                            
+                            <div class="question-options"> </div>
+                        </div>
+                        </div>
+                        <div id="submit" style="text-align: center;">
+                            <input id="Get" type="submit" class="btn btn-success" value="Valider" />
+                        </div> </div>
+                    
+                </div> </section>
+            
+            
+            
+            
+            
+            
+        </div>
+    </body>
+</html>

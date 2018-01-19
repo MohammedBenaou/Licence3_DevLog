@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+	<head>
+		<title>add_team_member</title>
+
+	</head>
+
+	<body>
+		<form action="http://localhost:8000/" method="GET">
+			<input type="hidden" name="cmd" value="setlocalization">
+			<SELECT name="team">
+				<OPTION VALUE="equipe1">Equipe 1</OPTION>
+				<OPTION VALUE="equipe2">Equipe 2</OPTION>
+			</SELECT>
+			<BR>
+			Nom<INPUT type=text name="name"><BR>
+			Latitude<INPUT type=text name="latitude"><BR>				
+			Longitude<INPUT type=text name="longitude"><BR>
+			<INPUT type="submit" value="Envoyer">
+		</form>
+	</body>
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        
+        
+        <title>TP Smartphone</title>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+        <meta name="description" content="" />
+        <meta name="keywords" content="" />
+
+        <script src="js/jquery.min.js"></script>
+        <script src="js/jquery.scrolly.min.js"></script>
+        <script src="js/jquery.scrollzer.min.js"></script>
+        <script src="js/skel.min.js"></script>
+        <script src="js/skel-layers.min.js"></script>
+        <script src="js/init.js"></script>
+        <script src="js/connection.js"></script>
+        <noscript>
+            <link rel="stylesheet" href="css/skel.css" />
+            <link rel="stylesheet" href="css/style.css" />
+            <link rel="stylesheet" href="css/style-wide.css" />
+        </noscript>
+        <link rel="stylesheet" href="css/ajouterplayer.css" />
+        
+        
+        <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
+        
+        <script type="text/javascript">
+            
+            function initialize() {
+                map = new google.maps.Map(document.getElementById("map_canvas"), {
+                                          zoom: 12,
+                                          center: new google.maps.LatLng(46.1666700, -1.1500000),
+                                          mapTypeId: google.maps.MapTypeId.ROADMAP
+                                          });
+            }
+        
+        if (navigator.geolocation){
+            var watchId = navigator.geolocation.watchPosition(successCallback,
+                                                              null,
+                                                              {enableHighAccuracy:true});
+        }
+        
+        function successCallback(position){
+            
+            map.panTo(new google.maps.LatLng(position.coords.latitude, position.coords.longitude));
+            var marker = new google.maps.Marker({
+                                                position: new google.maps.LatLng(position.coords.latitude, position.coords.longitude),
+                                                title : '',
+                                                map: map
+                                                });
+        }
+        
+            </script>
+        <style>
+            #map_canvas { height: 500px; width:100%;}
+            </style>
+    </head>
+    
+    
+    <body onload="initialize()">
+        
+        <!-- Header -->
+        <div id="header" class="skel-layers-fixed">
+            
+            <div class="top">
+                
+                <!-- Logo -->
+                <div id="logo">
+                    <h1 id="title">Jeu Ubiquitaire</h1></br>
+                    <span class="image avatar48"><img src="images/avatar.jpg" alt="" /></span>
+                </div>
+                
+                <!-- Nav -->
+                <nav id="nav">
+                    
+                    <ul>
+                        <li><a href="#top" id="top-link" class="skel-layers-ignoreHref"><span class="icon fa-home">Map</span></a></li>
+                        <li><a href="#portfolio" id="portfolio-link" class="skel-layers-ignoreHref"><span class="icon fa-th">Ajouter joueur</span></a></li>
+                        <li><a href="#about" id="about-link" class="skel-layers-ignoreHref"><span class="icon fa-user">Liste d'équipe</span></a></li>
+                        <li><a href="#contact" id="contact-link" class="skel-layers-ignoreHref"><span class="icon fa-envelope">Chat</span></a></li>
+                    </ul>
+                </nav>
+                
+            </div>
+            
+        </div>
+        
+        <!-- Main -->
+        <div id="main">
+            
+            
+            <!-- Intro -->
+            <section id="top" class="one dark cover">
+                <div class="container">
+                    
+                    
+                    
+                    <div id="map_canvas"></div>
+                    
+                    
+                    
+                </div>
+            </section>
+            
+            <!-- Portfolio -->
+            <section id="portfolio" class="two">
+                <div class="container">
+                    <div id="SousForm">
+                        <header> <h2>Ajouter Joueur</h2> </header>
+                        <div id="form"> <div class="section">
+                            
+                            <div class="question-label"> Nom : <input type="text" name="name" id="name"/> </div>
+                            <br>
+                            <div class="question-type">  Equipe :
+                                <select  name="team" id="team">
+                                    <option value="equipe1">Equipe 1</option>
+                                    <option value="equipe2">Equipe 2</option>
+                                </select>
+                                
+                            </div>
+                            
+                            <div class="question-options"> </div>
+                        </div>
+                        </div>
+                        <div id="submit" style="text-align: center;">
+                            <input id="Get" type="submit" class="btn btn-success" value="Valider" />
+                        </div> </div>
+                    
+                </div> </section>
+            
+            
+            
+            <!-- About Me -->
+            <section id="about" class="three">
+                <div class="container">
+                    
+                    <header>
+                        <h2>Liste d'équipe</h2>
+                    </header>
+                    
+                    <div class="row flat">
+                        <div class="col-lg-3 col-md-3 col-xs-6">
+                            <ul class="plan plan1" id="ici">
+                                <li class="plan-name">
+                                    Equipe 1
+                                </li>
+                                <li class="plan-price" >
+                                    <strong id="1"></strong> </br>
+                                </li>
+                            </ul>
+                        </div>
+                        <h2>              </h2>
+                        <div class="col-lg-3 col-md-3 col-xs-6">
+                            <ul class="plan plan3">
+                                <li class="plan-name">
+                                    Equipe 2
+                                </li>
+                                <li class="plan-price">
+                                    <strong id="2"></strong>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                </div>
+            </section>
+            <!-- Contact -->
+            <section id="contact" class="four">
+                <div class="container">
+                    
+                    <header>
+                        <h2>Envoie Message</h2>
+                    </header>
+                    
+                    <section id="contentmsg">
+                        <article>
+                            <header>
+                                
+                            </header>
+                            <form name="myForm" action="" method="post" onsubmit="return f_myForm()">
+                                <label  for="commentaire">Message :</label>
+                                <textarea cols="24" rows="5" name="Commentaire" id="commentaire" value="saisir un message"></textarea>
+                                <br/>
+                                <div id="esp_submit_reset">
+                                    <input type="submit" name="send_connexion" value="Envoyer" />
+                                </div>
+                            </form>
+                            
+                        </article>
+                    </section>
+                    
+                </div>
+            </section>
+            
+        </div>
+    </body>
+</html>

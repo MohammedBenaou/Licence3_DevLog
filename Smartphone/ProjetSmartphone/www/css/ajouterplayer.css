@@ -1,0 +1,1040 @@
+
+$(document).ready(function(){
+    
+    
+    /**** Declaration des variables ****/
+    var latitudeGoalActuelle = 0;
+    var longitudeGoalActuelle = 0;
+    var nomPlayer= "";
+    var nomTeam ="";
+    var serveur = "http://localhost:8000/";
+    var reloadTime = 4000;
+    var scrollBar = false;
+    var textTime = 10000;
+    var message_non_lu = 0;
+    var message_envoye = "";
+    var last_message = "";
+    var win = 0;
+    
+    //*********Premier connection ****//
+    
+    
+    
+    
+    
+    $("#Get").click(function() {
+        
+        alert('Get');
+        
+        nomPlayer = $("#name").val();
+        nomTeam = $("#team").val();
+        
+        
+        var urlAjoutEquipe = serveur + "?cmd=addteammember&team=" + nomTeam + "&name=" + nomPlayer;
+        alert(urlAjoutEquipe);
+        $.ajax({
+            header: 'Access-Control-Allow-Origin:*',
+            url: urlAjoutEquipe,
+            type: 'GET',
+            crossDomain: true,
+            ContentType: "Application/text; charset=utf-8",
+            cors : true,
+            
+            success: function (text) {
+                alert('successGet');
+                localisation();
+                initialize();
+            },
+            
+            error: function (xhr, status, errorThrown) {
+                //   alert( "Sorry, there was a problem!" );
+                console.log("Error: " + errorThrown);
+                console.log("Status: " + status);
+                console.dir(xhr);
+            },
+            
+            // Code to run regardless of success or failure
+            complete: function (xhr, status) {
+                //     alert( "The request is complete!" );
+            }
+        });
+        
+    });
+    
+    function localisation(){
+        var urlAjoutEquipe =  serveur +"?cmd=setlocalization&team=" + nomTeam + "&name="+ nomPlayer + "&latitude=0&longitude=0";
+        alert('Localisation' + urlAjoutEquipe);
+        $.ajax({
+            header: 'Access-Control-Allow-Origin:*',
+            
+            url: urlAjoutEquipe,
+            type: 'GET',
+            crossDomain: true,
+            ContentType: "Application/text; charset=utf-8",
+            cors : true,
+            success: function( text ) {
+                // $("#testPos").append(urlPost);
+                //  initialize();
+            },
+            
+            error: function( xhr, status, errorThrown ) {
+                //   alert( "Sorry, there was a problem!" );
+                console.log( "Error: " + errorThrown );
+                console.log( "Status: " + status );
+                console.dir( xhr );
+            },
+            
+            // Code to run regardless of success or failure
+            complete: function( xhr, status ) {
+                //     alert( "The request is complete!" );
+            }
+        });
+    }
+    
+    /********* MESSAGERIE *********/
+    if(document.getElementById("message")){
+        // actualisation des messages recu dans un intervalle relodTime, dans
+        // notre cas toutes les 4 secondes.
+        window.setInterval(getMessage, reloadTime);
+        $("#message").focus();
+    }
+    $("#envoyerMessage").click(function(){
+        //Si le message est vide, ne rien faire
+        if($("#message").val() != "")
+        message_envoye = $("#message").val();
+        envoyerMessage(message_envoye);
+    });
+    /********** FIN DE MESSAGERIE *****/
+    
+    
+    /************************* Test compatibilté de navigateur ************************************/
+    if (navigator.geolocation){
+        var watchId2 = navigator.geolocation.watchPosition(envoiPosition,
+        null,
+        {enableHighAccuracy:true});
+    }
+    else
+    alert("Votre navigateur ne prend pas en compte la géolocalisation HTML5");
+    /************************* Fin test compatibilté de navigateur ************************************/
+    
+    
+    /************************* Fonction qui envoie la position du joueur qui joue au serveur *******************************/
+    function envoiPosition(position){
+        var latitudeJoueur = position.coords.latitude;
+        var longitudeJoueur = position.coords.longitude;
+        var urlPost = serveur + "?cmd=setlocalization&team=" + nomTeam + "&name=" + nomPlayer+ "&latitude=" + latitudeJoueur + "&longitude=" + longitudeJoueur;
+        
+        $.ajax({
+            header: 'Access-Control-Allow-Origin:*',
+            
+            url: urlPost,
+            
+            type: 'GET',
+            crossDomain: true,
+            cors : true,
+            
+            ContentType: "Application/text; charset=utf-8",
+            
+            success: function( text ) {
+            },
+            
+            error: function( xhr, status, errorThrown ) {
+                //  alert( "Sorry, there was a problem!" );
+                console.log( "Error: " + errorThrown );
+                console.log( "Status: " + status );
+                console.dir( xhr );
+            },
+            
+            // Code to run regardless of success or failure
+            complete: function( xhr, status ) {
+            }
+        });
+    }
+    /************************* Fin fonction qui envoie la position du joueur qui joue au serveur *******************************/
+    
+    
+    /************************* Fonction qui retourner latitude et longitude d'un joueur *******************************/
+    function getPositionJoueur(equipe, name){
+        var adresseplacerjoueur = serveur + "?cmd=getteammemberlocation&team=" +equipe + "&name="+name;
+        var i = 2;
+        var latitutePositionJoueur = "";
+        var longitudePositionJoueur = "";
+        $.ajax({
+            header: 'Access-Control-Allow-Origin:*',
+            
+            // The URL for the request
+            url: adresseplacerjoueur,
+            async : false,
+            type: 'GET',
+            crossDomain: true,
+            cors : true,
+            
+            ContentType: "Application/text; charset=utf-8",
+            
+            success: function( text3 ) {
+                
+                if(text3.charAt(1) == "N")
+                {
+                    latitutePositionJoueur = 0;
+                    longitudePositionJoueur = 0;
+                }
+                else
+                {
+                    var resultPosition = text3;
+                    while (resultPosition.charAt(i) != "'" ){
+                        latitutePositionJoueur = latitutePositionJoueur + resultPosition.charAt(i);
+                        i++;
+                    }
+                    
+                    i= i+4;
+                    
+                    while (resultPosition.charAt(i) != "'" ){
+                        longitudePositionJoueur = longitudePositionJoueur + resultPosition.charAt(i);
+                        i++;
+                    }
+                    //$("#resultatEquipe").append(longitudePositionJoueur);
+                }},
+            
+            error: function( xhr, status, errorThrown ) {
+                //  alert( "Sorry, there was a problem!" );
+                console.log( "Error: " + errorThrown );
+                console.log( "Status: " + status );
+                console.dir( xhr );
+            },
+            // Code to run regardless of success or failure
+            complete: function( xhr, status ) {
+                //     alert( "The request is complete!" );
+            }
+            
+        });
+        
+        return {latitudePlayer: latitutePositionJoueur, longitudePlayer: longitudePositionJoueur};
+    }
+    /************************* Fin fonction qui retourner latitude et longitude d'un joueur *******************************/
+    
+    
+    /******************** Fonction qui affiche les joueurs de l'équipe 1 sur la map *****************************/
+    function afficheJoueurTeam1(){
+        var adresse2 = serveur + "?cmd=listteammembers&team=equipe1";//+equipe;
+        var longitude="";
+        var latitude="";
+        var resultObj;
+        $.ajax({
+            
+            // The URL for the request
+            url: adresse2,
+            
+            type: 'GET',
+            crossDomain: true,
+            cors : true,
+            
+            ContentType: "Application/text; charset=utf-8",
+            
+            success: function( text ) {
+                
+                for (var boucle=0 ; boucle<text.length ; boucle++){
+                    var nomJoueur = "";
+                    var boucle2 = boucle;
+                    
+                    while(text.charAt(boucle2) != ","){
+                        nomJoueur = nomJoueur + text.charAt(boucle2);
+                        boucle2++;
+                    }
+                    if (nomJoueur != nomPlayer){
+                        obj = getPositionJoueur("equipe1", nomJoueur);
+                        if(obj.latitudePlayer != 0 && obj.longitudePlayer != 0)
+                        {
+                            var marker4 = new google.maps.Marker({
+                                position: new google.maps.LatLng(obj.latitudePlayer, obj.longitudePlayer),
+                                icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+                                title : nomJoueur
+                            });
+                            marker4.setMap(map);
+                            google.maps.event.trigger(map, 'resize');
+                        }
+                        var infowindow = new google.maps.InfoWindow({
+                            content: 'Equipe 1'
+                        });
+                        
+                        google.maps.event.addListener(marker4, 'click', function() {
+                            infowindow.open(map, marker4);
+                        });
+                        boucle = boucle2;
+                    }}
+                
+            },
+            
+            error: function( xhr, status, errorThrown ) {
+                // alert( "Sorry, there was a problem!" );
+                console.log( "Error: " + errorThrown );
+                console.log( "Status: " + status );
+                console.dir( xhr );
+            },
+            
+            // Code to run regardless of success or failure
+            complete: function( xhr, status ) {
+                //     alert( "The request is complete!" );
+            }
+            
+        });
+        
+    }
+    
+    /******************** Fin de la fonction qui affiche les joueurs de l'équipe 1 *****************************/
+    
+    
+    /******************** Function qui affiche les joueurs de l'équipe 2 sur la map  ******************/
+    function afficheJoueurTeam2(){
+        var adresse2 = serveur + "?cmd=listteammembers&team=equipe2";
+        var longitude="";
+        var latitude="";
+        var obj;
+        $.ajax({
+            url: adresse2,
+            async : false,
+            type: 'GET',
+            crossDomain: true,
+            cors : true,
+            ContentType: "Application/text; charset=utf-8",
+            
+            success: function( text ) {
+                
+                for (var boucle=0 ; boucle<text.length ; boucle++){
+                    var nomJoueur = "";
+                    var boucle2 = boucle;
+                    while(text.charAt(boucle2) != ","){
+                        nomJoueur = nomJoueur + text.charAt(boucle2);
+                        boucle2++;
+                    }
+                    if (nomJoueur != nomPlayer){
+                        obj = getPositionJoueur("equipe2" , nomJoueur);
+                        if(obj.latitudePlayer != 0 && obj.longitudePlayer != 0)
+                        {
+                            var pinColor = "CCFF00";
+                            var pinImage = new google.maps.MarkerImage("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|" + pinColor,
+                            new google.maps.Size(21, 34),
+                            new google.maps.Point(0,0),
+                            new google.maps.Point(10, 34));
+                            
+                            var marker4 = new google.maps.Marker({
+                                position: new google.maps.LatLng(obj.latitudePlayer, obj.longitudePlayer),
+                                icon: pinImage,
+                                title : nomJoueur
+                            });
+                            
+                            var infowindow = new google.maps.InfoWindow({
+                                content: 'Equipe 2'
+                            });
+                            
+                            google.maps.event.addListener(marker4, 'click', function() {
+                                infowindow.open(map, marker4);
+                            });
+                            
+                            marker4.setMap(map);
+                            google.maps.event.trigger(map, 'resize');
+                        }
+                        boucle = boucle2;
+                    }
+                }
+            },
+            
+            error: function( xhr, status, errorThrown ) {
+                //  alert( "Sorry, there was a problem!" );
+                console.log( "Error: " + errorThrown );
+                console.log( "Status: " + status );
+                console.dir( xhr );
+            },
+            
+            // Code to run regardless of success or failure
+            complete: function( xhr, status ) {
+                //     alert( "The request is complete!" );
+            }
+            
+        });
+        
+    }
+    
+    /******************** Fin de la fonction qui affiche les joueurs de l'équipe 2 *****************************/
+    
+    
+    /******************** Fonction qui affiche les noms des joueurs de l'équipe 1 *****************************/
+    
+    function afficheNomJoueurTeam1(){
+        var adresse2 = serveur + "?cmd=listteammembers&team=equipe1";
+        var longitude="";
+        var latitude="";
+        var tabNom = new Array();
+        
+        
+        var obj;
+        var teamEmpty = "";
+        var i =0;
+        $.ajax({
+            url: adresse2,
+            async : false,
+            type: 'GET',
+            crossDomain: true,
+            cors : true,
+            
+            ContentType: "Application/text; charset=utf-8",
+            
+            success: function( text ) {
+                if(text != "")
+                {
+                    for (var boucle=0 ; boucle<text.length ; boucle++){
+                        var nomJoueur = "";
+                        var boucle2 = boucle;
+                        while(text.charAt(boucle2) != ","){
+                            nomJoueur = nomJoueur + text.charAt(boucle2);
+                            boucle2++;
+                        }
+                        tabNom.push(nomJoueur);
+                        boucle = boucle2;
+                    }}
+                //$("#2").append(text);
+                
+            },
+            
+            error: function( xhr, status, errorThrown ) {
+                //  alert( "Sorry, there was a problem!" );
+                console.log( "Error: " + errorThrown );
+                console.log( "Status: " + status );
+                console.dir( xhr );
+            },
+            
+            // Code to run regardless of success or failure
+            complete: function( xhr, status ) {
+                //     alert( "The request is complete!" );
+            }
+            
+        });
+        $("#1").empty();
+        
+        for (var longueur = 0 ; longueur < tabNom.length ; longueur ++){
+            
+            $("#1").append(tabNom[longueur]);
+            $("#1").append("</br>");
+            
+        }
+    }
+    /******************** Fin fonction qui affiche les noms des joueurs de l'équipe 1 *****************************/
+    
+    /******************** Fonction qui affiche les noms des joueurs de l'équipe 2 *****************************/
+    
+    function afficheNomJoueurTeam2(){
+        var adresse2 = serveur + "?cmd=listteammembers&team=equipe2";
+        var longitude="";
+        var latitude="";
+        var tabNom = new Array();
+        var obj;
+        var i =0;
+        $.ajax({
+            url: adresse2,
+            async : false,
+            type: 'GET',
+            crossDomain: true,
+            cors : true,
+            ContentType: "Application/text; charset=utf-8",
+            
+            success: function( text ) {
+                if(text != "")
+                {
+                    for (var boucle=0 ; boucle<text.length ; boucle++){
+                        var nomJoueur = "";
+                        var boucle2 = boucle;
+                        while(text.charAt(boucle2) != ","){
+                            nomJoueur = nomJoueur + text.charAt(boucle2);
+                            boucle2++;
+                        }
+                        tabNom.push(nomJoueur);
+                        boucle = boucle2;
+                    }
+                }},
+            
+            error: function( xhr, status, errorThrown ) {
+                //alert( "Sorry, there was a problem!" );
+                console.log( "Error: " + errorThrown );
+                console.log( "Status: " + status );
+                console.dir( xhr );
+            },
+            
+            // Code to run regardless of success or failure
+            complete: function( xhr, status ) {
+                //     alert( "The request is complete!" );
+            }
+            
+        });
+        $("#2").empty();
+        
+        for (var longueur = 0 ; longueur < tabNom.length ; longueur ++){
+            
+            $("#2").append(tabNom[longueur]);
+            $("#2").append("</br>");
+        }
+    }
+    /******************** Fin fonction qui affiche les noms des joueurs de l'équipe 1 *****************************/
+    
+    
+    /******************** Timer qui appelle au bout de 5sec les fonctions suivantes ****************************/
+    setTimeout(envoiPosition,5000);
+    setTimeout(afficheJoueurTeam1,5000);
+    setTimeout(afficheJoueurTeam2,5000);
+    setTimeout(afficheNomJoueurTeam1,2000);
+    setTimeout(afficheNomJoueurTeam2,2000);
+    /******************************* Fin Timer *****************************/
+    
+    /******************** Fonction qui envoie un message à une équipe lorsqu'un joueur a validé la position *****************************/
+    
+    function envoiMessageEquipePositionValidee(){
+        var urlRequete = serveur + "?cmd=sendmessagetoteam&team="+ nomTeam + "&message=contenu";
+        
+        /*  $.ajax({
+         url: adresse2,
+         async : false,
+         type: 'GET',
+         crossDomain: true,
+         
+         ContentType: "Application/text; charset=utf-8",
+         
+         success: function( text ) {
+         
+         for (var boucle=0 ; boucle<text.length ; boucle++){
+         var nomJoueur = "";
+         var boucle2 = boucle;
+         while(text.charAt(boucle2) != ","){
+         nomJoueur = nomJoueur + text.charAt(boucle2);
+         boucle2++;
+         }
+         tabNom.push(nomJoueur);
+         boucle = boucle2;
+         }
+         },
+         
+         error: function( xhr, status, errorThrown ) {
+         //alert( "Sorry, there was a problem!" );
+         console.log( "Error: " + errorThrown );
+         console.log( "Status: " + status );
+         console.dir( xhr );
+         },
+         
+         // Code to run regardless of success or failure
+         complete: function( xhr, status ) {
+         //     alert( "The request is complete!" );
+         }
+         
+         });*/
+    }
+    /******************** Fin fonction qui envoie un message à une équipe lorsqu'un joueur a validé la position *****************************/
+    
+    
+    
+    
+    /***************************** Fonction qui affiche le prochain lieu à aller sur la map ***********************************/
+    function nextGoal(){
+        $.ajax({
+            
+            // The URL for the request
+            url: serveur + "?cmd=getnextgoal&team="+nomTeam,
+            
+            type: 'GET',
+            crossDomain: true,
+            cors : true,
+            ContentType: "Application/text; charset=utf-8",
+            
+            success: function( text ) {
+                var resultat = text;
+                var i,j;
+                var latitudeALenvers="";
+                var latitude="";
+                var longitude="";
+                var longitudeALenvers="";
+                var premierNombre= 1;
+                
+                if(text.charAt(0) == "L" && text.charAt(1) == "e")
+                {
+                    if(win == 0)
+                    {
+                        alert(text);
+                        envoyerMessage("Bravo votre équipe a gagné");
+                        envoyerMessageAgainst("LOOOSE ! Nous avons Gagné ! Bande de Loooser");
+                        win = 1;
+                    }
+                }
+                else
+                {
+                    
+                    
+                    // Récupère latitude à l'envers
+                    i = resultat.length;
+                    while(resultat.charAt(i) != "," )
+                    {
+                        latitudeALenvers = latitudeALenvers + resultat.charAt(i);
+                        i--;
+                    }
+                    
+                    // Passer la virgule
+                    i--;
+                    // Récupère latitude à l'envers
+                    while(resultat.charAt(i) != ">" ){
+                        longitudeALenvers = longitudeALenvers + resultat.charAt(i);
+                        i--;
+                    }
+                    
+                    i = i-4;
+                    var nomPoint="";
+                    var longueurResultat = i;
+                    while (i > 12 ){
+                        nomPoint = nomPoint + resultat.charAt(i);
+                        i--;
+                    }
+                    
+                    // On remet à l'endroit longitude et latitude
+                    for (var k=latitudeALenvers.length ; k >=0 ; k-- ){
+                        latitude = latitude + latitudeALenvers.charAt(k);
+                    }
+                    for (var l=longitudeALenvers.length ; l >=0 ; l-- ){
+                        longitude = longitude + longitudeALenvers.charAt(l);
+                    }
+                    // On remet à l'endroit le nom du point
+                    var nomPointFinal = "";
+                    for (var m=nomPoint.length ; m >=0 ; m-- ){
+                        nomPointFinal = nomPointFinal + nomPoint.charAt(m);
+                    }
+                    
+                    if(latitudeGoalActuelle != latitude || longitudeGoalActuelle != longitude)
+                    {
+                        envoyerMessage("Vous avez un nouveau goal !");
+                        alert("Vous avez un nouveau goal !")
+                    }
+                    latitudeGoalActuelle = latitude;
+                    longitudeGoalActuelle = longitude;
+                    
+                    // $("#greenPoint").append(nomPointFinal);
+                    
+                    /*************** Creation du marker *****************/
+                    var pinColor = "00CC00";
+                    var pinImage = new google.maps.MarkerImage("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|" + pinColor,
+                    new google.maps.Size(21, 34),
+                    new google.maps.Point(0,0),
+                    new google.maps.Point(10, 34));
+                    
+                    var marker3 = new google.maps.Marker({
+                        position: new google.maps.LatLng(longitude,latitude),
+                        icon: pinImage,
+                        title : nomPointFinal
+                    });
+                    
+                    
+                    var infowindow = new google.maps.InfoWindow({
+                        content: "Point à aller : " + nomPointFinal
+                    });
+                    
+                    
+                    google.maps.event.addListener(marker3, 'click', function() {
+                        infowindow.open(map, marker3);
+                    });
+                    
+                    marker3.setMap(map);
+                    google.maps.event.trigger(map, 'resize');
+                    
+                    
+                }},
+            
+            error: function( xhr, status, errorThrown ) {
+                //alert( "Sorry, there was a problem!" );
+                console.log( "Error: " + errorThrown );
+                console.log( "Status: " + status );
+                console.dir( xhr );
+            },
+            
+            // Code to run regardless of success or failure
+            complete: function( xhr, status ) {
+            }
+        });
+    }
+    
+    setTimeout(nextGoal,1000);
+    
+    /***************************** Fin fonction qui affiche le prochain lieu à aller sous forme textuelle ***********************************/
+    
+    $("#refreshMap").click(function(){
+        
+        initialize();
+    });
+    
+    /* fonction qui remet a zero le compteur de message non lu et rend invisible la
+     notification corresppondante. Elle est appelee lors du clic sur l'onglet chat.
+     */
+    function raz(){
+        // on remet a zero le compteur
+        message_non_lu = 0;
+        
+        // on fait disparaitre la notification
+        $("#notification").hide();
+    }
+    
+    /* Cette fonction verifie l'arrivee de nouveaux messages */
+    function getMessage(){
+        var adresse = serveur + "?cmd=getlastmessagetoteam&team=" + nomTeam;
+        // On lance la requête ajax
+        $.ajax({
+            
+            // The URL for the request
+            url: adresse,
+            
+            type: 'GET',
+            
+            crossDomain: true,
+            cors : true,
+            ContentType: "Application/text; charset=utf-8",
+            
+            success: function(msg){
+                // On compare le message recu au dernier message
+                // Si ils sont différents, aucun nouveau message n'est recu
+                // Si non, on a une erreur et on l'affiche
+                if(msg != last_message && msg != "None") {
+                    // on met a jour la variable contenant le dernier message reçu
+                    last_message = msg;
+                    
+                    //on split le message recu pour separer les informations, nom du joueur
+                    // ayant envoye le message, la date d'envoie et le corps du message
+                    var message = msg.split("info:");
+                    
+                    var name_sender = message[1];
+                    var heure = message[2].split("GMT")[0];
+                    var core_message = message[3];
+                    
+                    if(core_message.charAt(0) == "L" && core_message.charAt(1) == "O" && core_message.charAt(2) == "O" && win == 0)
+                    {
+                        alert("L'équipe adverse vous a envoyé un message...");
+                        win = -1;
+                    }
+                    
+                    // Si l'utilisateur se situe ailleur que sur le chat et que le message recu n'est pas le message envoye
+                    if(window.location.hash != "#5" && message_envoye != core_message){
+                        
+                        // On incremente la variable correspondant aux messages non lu
+                        message_non_lu++;
+                        
+                        // On met a jour la balise contenant le nombre de message non lu
+                        $("#notification").html('<h1 id="nb_msg">' + message_non_lu + '</h1>');
+                        
+                        // Si le nombre de message non lu passe a un, cela veut dire que la notification
+                        // etait invisible donc on la rend visible
+                        if(message_non_lu == 1){
+                            $("#notification").show();
+                        }
+                    }
+                    
+                    // On ajoute le message recu dans la liste des messages
+                    $("#text").append('<tr> <td class="name">' + name_sender + "<br>" + heure + '</td><td class="message_core">' + core_message + '</td></tr>');
+                    
+                    // alternance des background des ligne du tableau pour mieux voir les messages
+                    var dnl = document.getElementsByTagName("tr");
+                    for(i = 0; i < dnl.length; i++)
+                    {
+                        if((Math.round(i / 2) * 2) == ((i / 2) * 2) )
+                        dnl.item(i).style.background="#E8E8FF";
+                        else
+                        dnl.item(i).style.background="#FFE8E8";
+                    }
+                    
+                    // On intialise les variables pour le scroll jusqu'en bas
+                    // Pour voir les derniers messages
+                    var container = $('#text');
+                    var content = $('#messages_content');
+                    var height = content.height()-300;
+                    var toBottom;
+                    
+                    // Si avant l'affichage des messages, on se trouve en bas,
+                    // alors on met toBottom a true afin de rester en bas
+                    // Il faut tester avant affichage car après, le message a déjà été
+                    // affiché
+                    if(container[0].scrollTop == height)
+                    toBottom = true;
+                    else
+                    toBottom = false;
+                    
+                    
+                    // On met à jour les variables de scroll
+                    // Après avoir affiché les messages
+                    content = $('#messages_content');
+                    height = content.height()-300;
+                    
+                    // Si toBottom vaut true, alors on reste en bas
+                    if(toBottom == true)
+                    container[0].scrollTop = content.height();
+                    
+                    // Lors de la première actualisation, on descend
+                    if(scrollBar != true) {
+                        container[0].scrollTop = content.height();
+                        scrollBar = true;
+                    }
+                }
+            },
+            
+            error: function( xhr, status, errorThrown ) {
+                //alert( "Sorry, there was a problem!" );
+                console.log( "Error: " + errorThrown );
+                console.log( "Status: " + status );
+                console.dir( xhr );
+            },
+            
+            // Code to run regardless of success or failure
+            complete: function( xhr, status ) {
+                //     alert( "The request is complete!" );
+            }
+        });
+    }
+    
+    /* fonction permettant l'envoie de message sur le chat de l'equipe */
+    function envoyerMessage(messageToSend){
+        
+        message_envoye = messageToSend;
+        var date = new Date();
+        var heure = date.getHours();
+        heure += ":" + date.getMinutes();
+        heure += ":" + date.getSeconds();
+        var adresse = serveur + "?cmd=sendmessagetoteam&team=" + nomTeam + "&message=info:";
+        
+        $.ajax({
+            
+            // The URL for the request
+            url: adresse,
+            
+            type: 'GET',
+            
+            crossDomain: true,
+            
+            ContentType: "Application/text; charset=utf-8",
+            cors : true,
+            
+            success: function(msg){
+                // Si la réponse n'est pas null, tout s'est bien passé,
+                // Si non, on a une erreur et on l'affiche
+                if(msg != null) {
+                    // On vide la zone de texte
+                    $("#message").val('');
+                    $("#reponse").html("Message bien envoyé").slideDown("slow");
+                    
+                } else
+                $("#reponse").html("Echec d'envoie du message").slideDown("slow");
+                //temps de transition pour que le message disparaisse
+                setTimeout(function () {
+                    $("#reponse").slideUp("slow").html('');
+                },
+                2000
+                );
+                // on resélectionne la zone de texte, en cas d'utilisation du bouton "Envoyer"
+                $("#message").focus();
+            },
+            
+            error: function( xhr, status, errorThrown ) {
+                //alert( "Sorry, there was a problem!" );
+                console.log( "Error: " + errorThrown );
+                console.log( "Status: " + status );
+                console.dir( xhr );
+            },
+            
+            // Code to run regardless of success or failure
+            complete: function( xhr, status ) {
+                //     alert( "The request is complete!" );
+            }
+        });
+    }
+    /************************* FIN FONCTION ENVOIE MESSAGE **********/
+    function envoyerMessageAgainst(messageToSend){
+        
+        if(nomTeam == "equipe1")
+        {
+            nomTeamtemp = "equipe2";
+        }
+        else
+        {
+            nomTeamtemp = "equipe1";
+        }
+        
+        message_envoye = messageToSend;
+        var date = new Date();
+        var heure = date.getHours();
+        heure += ":" + date.getMinutes();
+        heure += ":" + date.getSeconds();
+        var adresse = serveur + "?cmd=sendmessagetoteam&team=" + nomTeamtemp + "&message=info:" + nomPlayer + "info:à " + heure + "info:" + message_envoye;
+        
+        $.ajax({
+            
+            // The URL for the request
+            url: adresse,
+            
+            type: 'GET',
+            
+            crossDomain: true,
+            
+            ContentType: "Application/text; charset=utf-8",
+            
+            success: function(msg){
+                // Si la réponse n'est pas null, tout s'est bien passé,
+                // Si non, on a une erreur et on l'affiche
+                if(msg != null) {
+                    // On vide la zone de texte
+                    $("#message").val('');
+                    $("#reponse").html("Message bien envoyé").slideDown("slow");
+                    
+                } else
+                $("#reponse").html("Echec d'envoie du message").slideDown("slow");
+                //temps de transition pour que le message disparaisse
+                setTimeout(function () {
+                    $("#reponse").slideUp("slow").html('');
+                },
+                2000
+                );
+                // on resélectionne la zone de texte, en cas d'utilisation du bouton "Envoyer"
+                $("#message").focus();
+            },
+            
+            error: function( xhr, status, errorThrown ) {
+                //alert( "Sorry, there was a problem!" );
+                console.log( "Error: " + errorThrown );
+                console.log( "Status: " + status );
+                console.dir( xhr );
+            },
+            
+            // Code to run regardless of success or failure
+            complete: function( xhr, status ) {
+                //     alert( "The request is complete!" );
+            }
+        });
+    }
+    /***************************** Fin fonction envoie message aux adversaires ***********************************/
+    
+    /*function streetView(){
+     $.ajax({
+     
+     // The URL for the request
+     url: serveur + "?cmd=getnextgoal&team=equipe1",
+     
+     type: 'GET',
+     crossDomain: true,
+     
+     ContentType: "Application/text; charset=utf-8",
+     
+     success: function( text ) {
+     var resultat = text;
+     var i,j;
+     var latitudeALenvers="";
+     var latitude="";
+     var longitude="";
+     var longitudeALenvers="";
+     var premierNombre= 1;
+     
+     // Récupère latitude à l'envers
+     i = resultat.length;
+     while(resultat.charAt(i) != "," )
+     {
+     latitudeALenvers = latitudeALenvers + resultat.charAt(i);
+     i--;
+     }
+     
+     // Passer la virgule
+     i--;
+     // Récupère latitude à l'envers
+     while(resultat.charAt(i) != ">" ){
+     longitudeALenvers = longitudeALenvers + resultat.charAt(i);
+     i--;
+     }
+     
+     i = i-4;
+     var nomPoint="";
+     var longueurResultat = i;
+     while (i > 12 ){
+     nomPoint = nomPoint + resultat.charAt(i);
+     i--;
+     }
+     
+     // On remet à l'endroit longitude et latitude
+     for (var k=latitudeALenvers.length ; k >=0 ; k-- ){
+     latitude = latitude + latitudeALenvers.charAt(k);
+     }
+     for (var l=longitudeALenvers.length ; l >=0 ; l-- ){
+     longitude = longitude + longitudeALenvers.charAt(l);
+     }
+     // On remet à l'endroit le nom du point
+     var nomPointFinal = "";
+     for (var m=nomPoint.length ; m >=0 ; m-- ){
+     nomPointFinal = nomPointFinal + nomPoint.charAt(m);
+     }
+     
+     var goal = new google.maps.LatLng(latitude, longitude);
+     var panoramaOptions = {
+     position : goal,
+     pov: {
+     heading: 34,
+     pitch: 10
+     }
+     };
+     var panorama = new google.maps.StreetViewPanorama(document.getElementById('pano'), panoramaOptions);
+     map.setStreetView(panorama);
+     },
+     
+     error: function( xhr, status, errorThrown ) {
+     //  alert( "Sorry, there was a problem!" );
+     console.log( "Error: " + errorThrown );
+     console.log( "Status: " + status );
+     console.dir( xhr );
+     },
+     
+     // Code to run regardless of success or failure
+     complete: function( xhr, status ) {
+     }
+     });
+     }*/
+    
+    setTimeout(affichenextGoal , 1000);
+    setTimeout(nextGoal,1000);
+    
+    function initialize() {
+        map = new google.maps.Map(document.getElementById("map_canvas"), {
+            zoom: 14,
+            center: new google.maps.LatLng(46.1666700, -1.1500000),
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+        });
+        
+        setTimeout(envoiPosition,1000);
+        setTimeout(afficheJoueurTeam1,1000);
+        setTimeout(afficheJoueurTeam2,1000);
+        setTimeout(afficheNomJoueurTeam1,1000);
+        setTimeout(afficheNomJoueurTeam2,1000);
+        setTimeout(nextGoal,1000);
+    }
+    
+    if (navigator.geolocation){
+        var watchId = navigator.geolocation.watchPosition(successCallback,
+        null,
+        {enableHighAccuracy:true});
+    }
+    else
+    alert("Votre navigateur ne prend pas en compte la géolocalisation HTML5");
+    
+    function successCallback(position){
+        
+        map.panTo(new google.maps.LatLng(position.coords.latitude, position.coords.longitude));
+        
+        var marker = new google.maps.Marker({
+            position: new google.maps.LatLng(position.coords.latitude, position.coords.longitude),
+            title : 'Votre position',
+            map: map
+        });
+        
+        var infowindow = new google.maps.InfoWindow({
+            content: 'Vous'
+        });
+        
+        
+        google.maps.event.addListener(marker, 'click', function() {
+            infowindow.open(map, marker);
+        });
+    }
+    window.setInterval(initialize,20000);
+});
+
+
